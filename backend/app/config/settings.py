@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -16,6 +18,13 @@ class Settings(BaseSettings):
     JWT_ALGORITHM: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int
     REFRESH_TOKEN_EXPIRE_DAYS: int
+    REPOSITORIES_PATH: str
+    LLM_PROVIDER: str = "groq"
+
+    GROQ_API_KEY: Optional[str] = None
+
+    GEMINI_API_KEY: Optional[str] = None
+    EMBEDDING_PROVIDER: str = "gemini"
 
 
 settings = Settings()
