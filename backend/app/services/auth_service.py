@@ -1,4 +1,3 @@
-from app.database.database import db
 from app.models.user import User
 from app.schemas.user import UserCreate, UserLogin, UserResponse
 from app.utils.security import hash_password,verify_password

@@ -3,6 +3,7 @@ import asyncio
 from app.models.repository import Repository
 from app.repositories.repository_repository import (
     create_repository,
+    get_repositories_by_owner,
     get_repository_by_id,
     update_repository_status,
 )
@@ -61,6 +62,17 @@ async def create_new_repository(
         )
 
     return serialize_repository(created_repository)
+
+async def list_owned_repositories(
+    current_user_id: str,
+) -> list[RepositoryResponse]:
+
+    repositories = await get_repositories_by_owner(current_user_id)
+
+    return [
+        serialize_repository(repository)
+        for repository in repositories
+    ]
 
 async def get_owned_repository(
     repository_id: str,

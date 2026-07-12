@@ -4,6 +4,11 @@ from app.repositories.code_chunk_repository import (
     update_chunk_embedding,
 )
 from app.services.repository_service import get_owned_repository
+from app.ai.embeddings.factory import get_embedding
+from app.services.cache_service import (
+    cache_embedding,
+    get_cached_embedding,
+)
 
 
 async def generate_embeddings(
@@ -35,3 +40,5 @@ async def generate_embeddings(
         "message": "Embeddings generated successfully.",
         "chunks": len(chunks),
     }
+
+

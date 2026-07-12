@@ -14,7 +14,7 @@ env/
 
 # Cloned repositories (runtime data, not source)
 backend/repositories/
-
+kabada/
 # IDE / OS
 .vscode/
 .idea/
@@ -24,3 +24,5 @@ backend/repositories/
 build/
 dist/
 *.egg-info/
+scripts/manual/
+*.log

@@ -7,5 +7,6 @@ class GeminiLLM(BaseLLM):
         self,
         prompt: str,
         system_prompt: str | None = None,
+        json_mode: bool = False,
     ) -> str:
         raise NotImplementedError("Coming soon")

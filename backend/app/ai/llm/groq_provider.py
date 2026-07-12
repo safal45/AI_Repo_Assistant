@@ -15,6 +15,7 @@ class GroqLLM(BaseLLM):
         self,
         prompt: str,
         system_prompt: str | None = None,
+        json_mode: bool = False,
     ) -> str:
 
         messages = []
@@ -34,10 +35,16 @@ class GroqLLM(BaseLLM):
             }
         )
 
+        kwargs = {}
+
+        if json_mode:
+            kwargs["response_format"] = {"type": "json_object"}
+
         response = self.client.chat.completions.create(
             model="llama-3.3-70b-versatile",
             messages=messages,
             temperature=0.2,
+            **kwargs,
         )
 
         return response.choices[0].message.content

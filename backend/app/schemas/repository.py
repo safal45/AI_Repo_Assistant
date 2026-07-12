@@ -17,4 +17,7 @@ class RepositoryResponse(BaseModel):
 
 class IndexResponse(BaseModel):
     status: str
-    chunks: int
+    message: str 
+
+class RepositoryStatusResponse(BaseModel):
+    status: str

@@ -1,4 +1,4 @@
-from app.database.database import db
+from app.database.database import get_db
 
 
 async def vector_search(
@@ -21,6 +21,6 @@ async def vector_search(
         }
     ]
 
-    return await db.code_chunks.aggregate(
+    return await get_db().code_chunks.aggregate(
         pipeline
     ).to_list(length=limit)

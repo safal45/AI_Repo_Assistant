@@ -13,6 +13,7 @@ class BaseLLM(ABC):
         self,
         prompt: str,
         system_prompt: str | None = None,
+        json_mode: bool = False,
     ) -> str:
         """
         Generate a response from the language model.
@@ -20,6 +21,8 @@ class BaseLLM(ABC):
         Args:
             prompt: User input.
             system_prompt: Optional instruction for the model.
+            json_mode: If True, constrain the provider to return a single
+                JSON object rather than free-form text, when supported.
 
         Returns:
             Generated response as a string.

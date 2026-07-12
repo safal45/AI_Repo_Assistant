@@ -7,15 +7,21 @@ from app.schemas.repository import (
     IndexResponse,
     RepositoryCreate,
     RepositoryResponse,
+    RepositoryStatusResponse
 )
 from app.services.repository_service import (
     create_new_repository,
     get_owned_repository,
+    list_owned_repositories,
 )
 from app.services.indexing_service import index_repository
 from app.services.embedding_service import generate_embeddings
 from app.schemas.chat import ChatRequest, ChatResponse
 from app.services.chat_service import chat
+from app.schemas.agent import AgentRequest, AgentResponse
+from app.services.agent_service import run_agent
+from app.tasks.indexing_task import index_repository_task
+from app.repositories.repository_repository import update_repository_status
 
 
 router = APIRouter(
@@ -37,6 +43,15 @@ async def create_repository(
         repository,
         current_user,
     )
+
+@router.get(
+    "",
+    response_model=list[RepositoryResponse],
+)
+async def list_repositories(
+    current_user=Depends(get_current_user),
+):
+    return await list_owned_repositories(str(current_user["_id"]))
 
 @router.get("/{repository_id}/scan")
 async def scan_repository(
@@ -86,7 +101,6 @@ async def parse_repository(
         )
 
     return chunks
-
 @router.post(
     "/{repository_id}/index",
     response_model=IndexResponse,
@@ -95,16 +109,39 @@ async def index_repository_route(
     repository_id: str,
     current_user=Depends(get_current_user),
 ):
-    chunk_count = await index_repository(
+    # 1. Ownership check — YE ZAROORI HAI (soch kyun, neeche)
+    await get_owned_repository(repository_id, str(current_user["_id"]))
+    
+    # 2. Status "pending" set kar
+    await update_repository_status(repository_id, "pending")
+    
+    # 3. Task queue mein daal (await NAHI — .delay() sync hai)
+    index_repository_task.delay(repository_id, str(current_user["_id"]))
+    
+    # 4. Turant return
+    return IndexResponse(
+        status="pending",
+        message="Indexing started",
+    )
+
+
+@router.get(
+    "/{repository_id}/status",
+    response_model=RepositoryStatusResponse,
+)
+async def get_repository_status_route(
+    repository_id: str,
+    current_user=Depends(get_current_user),
+):
+    repository = await get_owned_repository(
         repository_id,
         str(current_user["_id"]),
     )
 
-    return IndexResponse(
-        status="indexed",
-        chunks=chunk_count,
+    return RepositoryStatusResponse(
+        status=repository["status"],
     )
-
+    
 @router.post("/{repository_id}/embed")
 async def embed_repository(
     repository_id: str,
@@ -129,3 +166,20 @@ async def chat_with_repository(
         current_user_id=str(current_user["_id"]),
         question=request.question,
     )
+
+@router.post(
+    "/{repository_id}/agent",
+    response_model=AgentResponse,
+)
+async def agent_query_repository(
+    repository_id: str,
+    request: AgentRequest,
+    current_user=Depends(get_current_user),
+):
+    answer = await run_agent(
+        repository_id=repository_id,
+        current_user_id=str(current_user["_id"]),
+        user_query=request.question,
+    )
+
+    return AgentResponse(answer=answer)
