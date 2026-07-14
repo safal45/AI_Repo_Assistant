@@ -1,0 +1,124 @@
+[
+  {
+    "question": "Signup ke time password kaise hash hota hai?",
+    "expected_files": [
+      "backend/app/utils/security.py"
+    ]
+  },
+  {
+    "question": "Login ke time password verify kaise hota hai?",
+    "expected_files": [
+      "backend/app/services/auth_service.py",
+      "backend/app/utils/security.py"
+    ]
+  },
+  {
+    "question": "Access token kitne time ke liye valid hai, aur yeh config kahan set hai?",
+    "expected_files": [
+      "backend/app/utils/jwt.py",
+      "backend/app/config/settings.py"
+    ]
+  },
+  {
+    "question": "Refresh token flow kaise kaam karta hai?",
+    "expected_files": [
+      "backend/app/services/auth_service.py"
+    ]
+  },
+  {
+    "question": "Invalid/expired token par kya error response milta hai?",
+    "expected_files": [
+      "backend/app/dependencies/auth.py"
+    ]
+  },
+  {
+    "question": "GitHub se repository clone kaise hoti hai?",
+    "expected_files": [
+      "backend/app/services/git_service.py"
+    ]
+  },
+  {
+    "question": "Agar repository pehle se clone ho chuki ho to dobara clone hoti hai kya?",
+    "expected_files": [
+      "backend/app/services/git_service.py"
+    ]
+  },
+  {
+    "question": "Scan ke time kaunsi directories ignore hoti hain (jaise node_modules, .git, etc.)?",
+    "expected_files": [
+      "backend/app/services/scanner_service.py"
+    ]
+  },
+  {
+    "question": "Binary files kaise detect hoti hain?",
+    "expected_files": [
+      "backend/app/services/scanner_service.py"
+    ]
+  },
+  {
+    "question": "Virtualenv folder kaise pehchana jaata hai jab naam fixed nahi hota?",
+    "expected_files": [
+      "backend/app/services/scanner_service.py"
+    ]
+  },
+  {
+    "question": "Indexing ke time sirf Python files process hoti hain ya baaki languages bhi?",
+    "expected_files": [
+      "backend/app/services/indexing_service.py"
+    ]
+  },
+  {
+    "question": "Embedding generate karne se pehle cache check hota hai kya?",
+    "expected_files": [
+      "backend/app/ai/embeddings/factory.py"
+    ]
+  },
+  {
+    "question": "Embedding cache Redis mein kitne din tak rehti hai?",
+    "expected_files": [
+      "backend/app/services/cache_service.py"
+    ]
+  },
+  {
+    "question": "Redis cache key ek query text se kaise banti hai?",
+    "expected_files": [
+      "backend/app/services/cache_service.py"
+    ]
+  },
+  {
+    "question": "MongoDB mein vector search kaise implement ki gayi hai?",
+    "expected_files": [
+      "backend/app/repositories/search_repository.py"
+    ]
+  },
+  {
+    "question": "Agar context mein answer na mile to chat endpoint kya response deta hai?",
+    "expected_files": [
+      "backend/app/services/chat_service.py"
+    ]
+  },
+  {
+    "question": "LLM provider (Groq vs Gemini) kaise select hota hai?",
+    "expected_files": [
+      "backend/app/ai/llm/factory.py"
+    ]
+  },
+  {
+    "question": "Agent LLM-supplied file path se directory traversal (../../etc/passwd) se kaise bachta hai?",
+    "expected_files": [
+      "backend/app/utils/path.py"
+    ]
+  },
+  {
+    "question": "Final answer dene se pehle agent maximum kitni baar tool call kar sakta hai?",
+    "expected_files": [
+      "backend/app/agent/agent.py"
+    ]
+  },
+  {
+    "question": "git_blame tool kisi line ka author kaise nikalta hai?",
+    "expected_files": [
+      "backend/app/agent/tools/git_blame.py"
+    ]
+  }
+]

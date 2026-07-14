@@ -31,6 +31,7 @@ async def index_repository(
             parse_python_file(
                 repository_id,
                 file,
+                repository_path,
             )
         )
 

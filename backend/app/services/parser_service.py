@@ -11,6 +11,7 @@ from app.services.scanner_service import (
 def parse_python_file(
     repository_id: str,
     path: Path,
+    repository_path: Path,
 ) -> list[CodeChunk]:
     """
     Parse a Python file and extract classes/functions as CodeChunks.
@@ -62,7 +63,7 @@ def parse_python_file(
             chunks.append(
                 CodeChunk(
                     repository_id=repository_id,
-                    file_path=str(path),
+                    file_path=str(path.relative_to(repository_path)),
                     language=language,
                     symbol=node.name,
                     symbol_type=symbol_type,

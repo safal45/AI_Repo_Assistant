@@ -1,4 +1,7 @@
+import json
+
 from fastapi import APIRouter, Depends, status
+from fastapi.responses import StreamingResponse
 from app.services.scanner_service import list_files, detect_language
 from app.services.parser_service import parse_python_file
 from app.utils.path import get_repository_path
@@ -19,7 +22,7 @@ from app.services.embedding_service import generate_embeddings
 from app.schemas.chat import ChatRequest, ChatResponse
 from app.services.chat_service import chat
 from app.schemas.agent import AgentRequest, AgentResponse
-from app.services.agent_service import run_agent
+from app.services.agent_service import run_agent,run_agent_streaming
 from app.tasks.indexing_task import index_repository_task
 from app.repositories.repository_repository import update_repository_status
 
@@ -97,6 +100,7 @@ async def parse_repository(
             parse_python_file(
                 repository_id,
                 file,
+                repository_path,
             )
         )
 
@@ -183,3 +187,23 @@ async def agent_query_repository(
     )
 
     return AgentResponse(answer=answer)
+
+
+@router.post("/{repository_id}/agent/stream")
+async def agent_query_repository_stream(
+    repository_id: str,
+    request: AgentRequest,
+    current_user=Depends(get_current_user),
+):
+    async def event_generator():
+        async for event in run_agent_streaming(
+            repository_id=repository_id,
+            current_user_id=str(current_user["_id"]),
+            user_query=request.question,
+        ):
+            yield f"data: {json.dumps(event)}\n\n"
+
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+    )

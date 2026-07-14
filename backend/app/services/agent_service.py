@@ -247,3 +247,21 @@ async def run_agent(
             "number of steps. Try asking a more specific question "
             "(e.g. naming a file or feature)."
         )
+
+async def run_agent_streaming(repository_id, current_user_id, user_query):
+    await get_owned_repository(repository_id, current_user_id)
+
+    registry = ToolRegistry()
+    registry.register(_build_search_repository_tool(repository_id))
+    registry.register(_build_read_file_tool(repository_id))
+    registry.register(_build_list_directory_tool(repository_id))
+    registry.register(_build_grep_code_tool(repository_id))
+    registry.register(build_git_history_tool(repository_id))
+    registry.register(build_git_log_tool(repository_id))
+    registry.register(build_git_diff_tool(repository_id))
+    registry.register(build_git_blame_tool(repository_id))
+
+    agent = Agent(registry=registry, thinker=AgentThinker(registry))
+
+    async for event in agent.run_streaming(user_query):
+        yield event

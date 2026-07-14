@@ -84,3 +84,60 @@ class Agent:
             f"Agent did not reach a final answer within "
             f"{self.max_iterations} iterations."
         )
+    
+    async def run_streaming(self,user_query: str):
+        state = AgentState(user_query = user_query )
+
+        for _ in range(self.max_iterations):
+            yield{"type": "thinking", "step": len(state.observations)}
+            action = await self.thinker.think(
+                user_query=state.user_query,
+                observations=state.observations,
+            )
+
+            if action.action_type == "final_answer":
+                if not state.observations:
+                    state.observations.append(
+                        Observation(
+                            tool_name="system_notice",
+                            arguments={},
+                            result=ToolResult(
+                                success=False,
+                                content=(
+                                    "You attempted to give a final_answer "
+                                    "without calling any tool first. You "
+                                    "must call a tool to gather real "
+                                    "information about this repository "
+                                    "before answering."
+                                ),
+                            ),
+                        )
+                    )
+                    continue
+
+                else:
+                    state.completed = True
+                    yield {"type": "answer", "content": action.answer}
+                    return
+            
+            arguments = action.arguments or {}
+
+            yield {"type": "tool_call", "tool": action.tool_name, "arguments": arguments}
+            
+            result = await self.registry.execute(action.tool_name, arguments)
+                
+            yield {"type": "tool_result", "tool": action.tool_name, "success": result.success}
+                
+            state.observations.append(
+                Observation(
+                        tool_name=action.tool_name,
+                        arguments=arguments,
+                        result=result,
+                )
+            )
+        
+        # loop khatam, max iterations hit
+        yield {"type": "error", "message": f"Could not find an answer within {self.max_iterations} steps."}
+
+               
+            
