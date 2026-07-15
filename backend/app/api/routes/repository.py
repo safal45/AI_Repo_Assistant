@@ -2,6 +2,7 @@ import json
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import StreamingResponse
+from app.config.settings import settings
 from app.services.scanner_service import list_files, detect_language
 from app.services.parser_service import parse_python_file
 from app.utils.path import get_repository_path
@@ -118,10 +119,22 @@ async def index_repository_route(
     
     # 2. Status "pending" set kar
     await update_repository_status(repository_id, "pending")
-    
-    # 3. Task queue mein daal (await NAHI — .delay() sync hai)
-    index_repository_task.delay(repository_id, str(current_user["_id"]))
-    
+
+    # 3. Celery available hai to task queue mein daal (await NAHI —
+    #    .delay() sync hai), warna (e.g. Render free tier, no worker)
+    #    seedha inline chala do.
+    if settings.USE_CELERY:
+        index_repository_task.delay(repository_id, str(current_user["_id"]))
+    else:
+        # Mirrors index_repository_task's own except block, so a failure
+        # here leaves status "failed" instead of stuck on "pending" -
+        # same contract as the Celery path.
+        try:
+            await index_repository(repository_id, str(current_user["_id"]))
+        except Exception:
+            await update_repository_status(repository_id, "failed")
+            raise
+
     # 4. Turant return
     return IndexResponse(
         status="pending",
