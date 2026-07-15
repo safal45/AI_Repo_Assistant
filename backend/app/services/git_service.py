@@ -1,7 +1,6 @@
 from pathlib import Path
 
 from git import Repo
-from git.exc import GitCommandError
 from app.models.repository import Repository
 from app.exceptions.git import GitCloneError
 
@@ -27,7 +26,13 @@ def clone_repository(
             local_path,
         )
 
-    except GitCommandError as e:
+    except Exception as e:
+        # Broad on purpose: a bad URL, DNS/network failure, auth failure,
+        # or disk error can all surface as different exception types here
+        # (not just GitCommandError) - every one of them must become a
+        # GitCloneError so create_new_repository's except block actually
+        # catches it and marks the repository "failed" instead of letting
+        # it escape as an unhandled 500 with the DB left in "pending".
         raise GitCloneError(
             f"Failed to clone repository: {e}"
         )

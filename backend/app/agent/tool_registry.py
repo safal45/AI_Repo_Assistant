@@ -2,6 +2,7 @@ import inspect
 from typing import Any
 
 from app.agent.tool import Tool
+from app.agent.tool_result import ToolResult
 
 
 class ToolRegistry:
@@ -33,9 +34,15 @@ class ToolRegistry:
     ):
         tool = self.get(tool_name)
 
-        result = tool.function(**arguments)
+        try:
+            result = tool.function(**arguments)
 
-        if inspect.isawaitable(result):
-            return await result
+            if inspect.isawaitable(result):
+                result = await result
 
-        return result
+            return result
+        except Exception as e:
+            return ToolResult(
+                success=False,
+                content=f"Tool '{tool_name}' failed: {e}",
+            )

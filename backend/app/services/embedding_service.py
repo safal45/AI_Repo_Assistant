@@ -3,12 +3,14 @@ from app.repositories.code_chunk_repository import (
     get_chunks_by_repository,
     update_chunk_embedding,
 )
+from app.repositories.repository_repository import update_repository_status
 from app.services.repository_service import get_owned_repository
 from app.ai.embeddings.factory import get_embedding
 from app.services.cache_service import (
     cache_embedding,
     get_cached_embedding,
 )
+import asyncio
 
 
 async def generate_embeddings(
@@ -26,15 +28,24 @@ async def generate_embeddings(
 
     chunks = await get_chunks_by_repository(repository_id)
 
-    for chunk in chunks:
-        vector = await embedding_provider.create_embedding(
-            chunk["content"]
-        )
+    await update_repository_status(repository_id, "embedding")
 
-        await update_chunk_embedding(
-            chunk_id=str(chunk["_id"]),
-            embedding=vector,
-        )
+    try:
+        for chunk in chunks:
+            vector = await embedding_provider.create_embedding(
+                chunk["content"]
+            )
+
+            await update_chunk_embedding(
+                chunk_id=str(chunk["_id"]),
+                embedding=vector,
+            )
+            await asyncio.sleep(0.7)      # ← ye ek line
+    except Exception:
+        await update_repository_status(repository_id, "embedding_failed")
+        raise
+
+    await update_repository_status(repository_id, "embedded")
 
     return {
         "message": "Embeddings generated successfully.",

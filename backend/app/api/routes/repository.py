@@ -1,6 +1,6 @@
 import json
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import StreamingResponse
 from app.services.scanner_service import list_files, detect_language
 from app.services.parser_service import parse_python_file
@@ -151,10 +151,18 @@ async def embed_repository(
     repository_id: str,
     current_user=Depends(get_current_user),
 ):
-    return await generate_embeddings(
-        repository_id,
-        str(current_user["_id"]),
-    )
+    try:
+        return await generate_embeddings(
+            repository_id,
+            str(current_user["_id"]),
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=502,
+            detail=f"Failed to generate embeddings: {e}",
+        )
 
 @router.post(
     "/{repository_id}/chat",
