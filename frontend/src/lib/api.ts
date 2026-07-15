@@ -1,4 +1,4 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 const TOKEN_KEY = "access_token";
 
@@ -86,7 +86,7 @@ export async function login(
   body.set("username", email);
   body.set("password", password);
 
-  const res = await fetch(`${API_BASE}/auth/login`, {
+  const res = await fetch(`${API_URL}/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body,
@@ -102,7 +102,7 @@ export async function register(
   email: string,
   password: string,
 ): Promise<User> {
-  const res = await fetch(`${API_BASE}/auth/register`, {
+  const res = await fetch(`${API_URL}/auth/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ name, email, password }),
@@ -112,7 +112,7 @@ export async function register(
 }
 
 export async function getRepositories(): Promise<Repository[]> {
-  const res = await fetch(`${API_BASE}/repositories`, {
+  const res = await fetch(`${API_URL}/repositories`, {
     headers: authHeaders(),
   });
 
@@ -120,7 +120,7 @@ export async function getRepositories(): Promise<Repository[]> {
 }
 
 export async function addRepository(githubUrl: string): Promise<Repository> {
-  const res = await fetch(`${API_BASE}/repositories`, {
+  const res = await fetch(`${API_URL}/repositories`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -135,7 +135,7 @@ export async function addRepository(githubUrl: string): Promise<Repository> {
 export async function indexRepository(
   repoId: string,
 ): Promise<IndexResponse> {
-  const res = await fetch(`${API_BASE}/repositories/${repoId}/index`, {
+  const res = await fetch(`${API_URL}/repositories/${repoId}/index`, {
     method: "POST",
     headers: authHeaders(),
   });
@@ -146,7 +146,7 @@ export async function indexRepository(
 export async function embedRepository(
   repoId: string,
 ): Promise<EmbedResponse> {
-  const res = await fetch(`${API_BASE}/repositories/${repoId}/embed`, {
+  const res = await fetch(`${API_URL}/repositories/${repoId}/embed`, {
     method: "POST",
     headers: authHeaders(),
   });
@@ -157,7 +157,7 @@ export async function embedRepository(
 export async function getRepositoryStatus(
   repoId: string,
 ): Promise<RepositoryStatusResponse> {
-  const res = await fetch(`${API_BASE}/repositories/${repoId}/status`, {
+  const res = await fetch(`${API_URL}/repositories/${repoId}/status`, {
     headers: authHeaders(),
   });
 
@@ -176,7 +176,7 @@ export async function askStream(
   question: string,
   onEvent: (event: AgentStreamEvent) => void
 ){
-  const res = await fetch(`${API_BASE}/repositories/${repoId}/agent/stream`, {
+  const res = await fetch(`${API_URL}/repositories/${repoId}/agent/stream`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
